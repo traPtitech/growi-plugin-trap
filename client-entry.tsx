@@ -13,7 +13,12 @@ type RendererOptions = { remarkPlugins?: unknown[] };
 type Generator = (...args: unknown[]) => RendererOptions | Promise<RendererOptions>;
 type GrowiFacade = {
   markdownRenderer?: {
-    optionsGenerators?: Record<string, Generator | undefined>;
+    optionsGenerators?: {
+      generateViewOptions?: Generator;
+      customGenerateViewOptions?: Generator;
+      generatePreviewOptions?: Generator;
+      customGeneratePreviewOptions?: Generator;
+    };
   };
 };
 type PluginActivator = { activate: () => void; deactivate: () => void };
@@ -25,7 +30,7 @@ declare global {
   }
 }
 
-const originals = new Map<string, Generator>();
+const originals = new Map<string, Generator | undefined>();
 let abortController: AbortController | undefined;
 let removeWidgetResize: (() => void) | undefined;
 let stampStylesheet: HTMLLinkElement | undefined;
@@ -49,16 +54,19 @@ const activate = (): void => {
   stampStylesheet ??= addTraqStampStylesheet();
   catalogPromise = loadTraqStampNames(abortController.signal);
 
-  for (const name of ['generateViewOptions', 'generatePreviewOptions']) {
-    const generator = generators[name];
-    if (generator == null || originals.has(name)) continue;
+  for (const [customName, originalName] of [
+    ['customGenerateViewOptions', 'generateViewOptions'],
+    ['customGeneratePreviewOptions', 'generatePreviewOptions'],
+  ] as const) {
+    const generator = generators[originalName];
+    if (generator == null || originals.has(customName)) continue;
     const wrapped: Generator = async function (this: unknown, ...args) {
       await catalogPromise;
       const options = await generator.apply(this, args);
       return withLegacyMarkdown(options);
     };
-    originals.set(name, generator);
-    generators[name] = wrapped;
+    originals.set(customName, generators[customName]);
+    generators[customName] = wrapped;
   }
 
   removeWidgetResize ??= activateTraqWidgetResize();
@@ -67,7 +75,10 @@ const activate = (): void => {
 const deactivate = (): void => {
   const generators = window.growiFacade?.markdownRenderer?.optionsGenerators;
   if (generators != null) {
-    for (const [name, original] of originals) generators[name] = original;
+    for (const [name, original] of originals) {
+      if (original == null) delete generators[name as keyof typeof generators];
+      else generators[name as keyof typeof generators] = original;
+    }
   }
   originals.clear();
   abortController?.abort();
