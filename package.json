@@ -1,0 +1,26 @@
+{
+  "name": "growi-plugin-trap",
+  "version": "1.0.0",
+  "description": "traP compatibility features for GROWI",
+  "type": "module",
+  "keywords": [
+    "growi",
+    "growi-plugin"
+  ],
+  "scripts": {
+    "build": "tsc --noEmit && vite build"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0",
+    "vite": "^7.0.0"
+  },
+  "growiPlugin": {
+    "schemaVersion": "4",
+    "types": [
+      "script"
+    ]
+  },
+  "dependencies": {
+    "micromark-util-decode-string": "2.0.0"
+  }
+}
