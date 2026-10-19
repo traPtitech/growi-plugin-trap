@@ -7,7 +7,7 @@ traP compatibility Script Plugin for GROWI.
 - Renders old Crowi traQ stamp syntax `:stamp:` / `:stamp;` and user icons `:@username:` / `:@username;`.
 - Converts Crowi page links `[/path]` and `<//path>` in page and preview Markdown.
 - Renders `:::success` containers in the existing green `tip` callout style.
-- Resizes traQ Widget iframes only for messages from `https://q.trap.jp`, after matching the sending window to its iframe and validating a bounded numeric height.
+- Resizes traQ Widget iframes from the `[URL, height]` messages sent by `https://q.trap.jp`, after matching the sending window and iframe URL and validating a bounded numeric height.
 - Leaves page and revision Markdown data unchanged.
 
 ## Limitations
