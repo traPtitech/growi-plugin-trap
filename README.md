@@ -1,20 +1,20 @@
 # growi-plugin-trap
 
-traP compatibility Script Plugin for GROWI.
+GROWI向けのtraP互換スクリプトプラグインです。
 
-## Features
+## 機能
 
-- Renders old Crowi traQ stamp syntax `:stamp:` / `:stamp;` and user icons `:@username:` / `:@username;`.
-- Converts Crowi page links `[/path]` and `<//path>` in page and preview Markdown.
-- Renders `:::success` containers in the existing green `tip` callout style.
-- Resizes traQ Widget iframes from the `[URL, height]` messages sent by `https://q.trap.jp`, after matching the sending window and iframe URL and validating a bounded numeric height.
-- Leaves page and revision Markdown data unchanged.
+- Crowiの旧形式のtraQスタンプ記法 `:stamp:` / `:stamp;` と、ユーザーアイコン記法 `:@username:` / `:@username;` を表示します。
+- ページとプレビューのMarkdown内にあるCrowiのページリンク `[/path]` と `<//path>` を変換します。
+- `:::success` コンテナを、既存の緑色の `tip` コールアウトと同じ形式で表示します。
+- `https://q.trap.jp` から送られる `[URL, height]` メッセージについて、送信元ウィンドウとiframeのURLを照合し、高さが許容範囲内の数値であることを確認してから、traQ Widgetのiframeの高さを調整します。
+- ページとリビジョンのMarkdownデータは変更しません。
 
-## Limitations
+## 制限事項
 
-GROWI's Script Plugin API exposes client-side page and preview Markdown options only. It does not provide a shared extension registration point for SSR, revision, or comment renderers. This plugin does not rewrite stored page or revision data.
+GROWIのScript Plugin APIで指定できるのは、ページとプレビューのMarkdownに対するクライアント側の処理だけです。SSR、リビジョン、コメントの各レンダラーに共通の拡張登録ポイントはありません。このプラグインは保存済みのページやリビジョンのデータを書き換えません。
 
-## Development
+## 開発
 
 ```sh
 pnpm install
