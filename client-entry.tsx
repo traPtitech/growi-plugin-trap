@@ -1,6 +1,6 @@
 import './src/styles.css';
 
-import { legacyMarkdownRemarkPlugin } from './src/legacy-markdown';
+import { traqStampRemarkPlugin } from './src/traq-stamps';
 import { activateTraqWidgetResize } from './src/traq-widget-resize';
 import {
   addTraqStampStylesheet,
@@ -36,10 +36,10 @@ let removeWidgetResize: (() => void) | undefined;
 let stampStylesheet: HTMLLinkElement | undefined;
 let catalogPromise: Promise<void> = Promise.resolve();
 
-const withLegacyMarkdown = (options: RendererOptions): RendererOptions => {
+const withTraqStamps = (options: RendererOptions): RendererOptions => {
   if (Array.isArray(options.remarkPlugins)) {
     options.remarkPlugins.unshift([
-      legacyMarkdownRemarkPlugin,
+      traqStampRemarkPlugin,
       { origin: traqOrigin, names: traqStampNames },
     ]);
   }
@@ -63,7 +63,7 @@ const activate = (): void => {
     const wrapped: Generator = async function (this: unknown, ...args) {
       await catalogPromise;
       const options = await generator.apply(this, args);
-      return withLegacyMarkdown(options);
+      return withTraqStamps(options);
     };
     originals.set(customName, generators[customName]);
     generators[customName] = wrapped;

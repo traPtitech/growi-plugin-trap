@@ -4,8 +4,6 @@ type Position = { start?: { offset?: number }; end?: { offset?: number } };
 type Node = {
   type: string;
   value?: string;
-  name?: string;
-  url?: string;
   children?: Node[];
   data?: Record<string, unknown>;
   position?: Position;
@@ -22,7 +20,6 @@ interface Stamp extends Node {
 
 const STAMP_OR_ESCAPE =
   /\\[\s\S]|&(?:#[xX][\da-fA-F]+|#\d+|[a-zA-Z][\da-zA-Z]*);|:((?:[a-zA-Z0-9+_-]{1,32}|@[a-zA-Z0-9_-]+)[\w+.-]*)([:;]|\\[:;]|&(?:colon|semi|#0*5[89]|#[xX]0*3[aAbB]);)/g;
-const LEGACY_LINK = /\[(\/[^\]\n]+)\]|<\/\/([^>\s]+)>/g;
 
 const text = (value: string): Text => ({ type: 'text', value });
 
@@ -134,29 +131,6 @@ const replaceStamps = (
     offset = match.index + match[0].length;
   }
   appendGap(offset, raw.length);
-  return nodes.flatMap((node) => {
-    if (node.type !== 'text' || node.value == null) return [node];
-    return replaceLegacyLinks(node as Text) ?? [node];
-  });
-};
-
-const makePageLink = (url: string): Node | undefined => {
-  if (!url.startsWith('/') || url.startsWith('//') || /[\\\u0000-\u001f]/.test(url)) return undefined;
-  return { type: 'link', url, children: [text(url)] };
-};
-
-const replaceLegacyLinks = (node: Text): Node[] | undefined => {
-  const nodes: Node[] = [];
-  let cursor = 0;
-  for (const match of node.value.matchAll(LEGACY_LINK)) {
-    const url = match[1] ?? `/${match[2]}`;
-    const link = makePageLink(url);
-    if (match.index > cursor) nodes.push(text(node.value.slice(cursor, match.index)));
-    nodes.push(link ?? text(match[0]));
-    cursor = match.index + match[0].length;
-  }
-  if (cursor === 0) return undefined;
-  if (cursor < node.value.length) nodes.push(text(node.value.slice(cursor)));
   return nodes;
 };
 
@@ -167,30 +141,6 @@ const transform = (node: Node, source: string, config: TraqStampConfig): void =>
   for (let index = 0; index < parent.children.length; ) {
     const child = parent.children[index];
     if (!isCandidate(child, source)) {
-      if (child.type === 'containerDirective' && child.name?.toLowerCase() === 'success') {
-        child.data = {
-          ...child.data,
-          hName: 'callout',
-          hProperties: { type: 'tip', ...((child.data?.hProperties as object | undefined) ?? {}) },
-        };
-      }
-      if (child.type === 'html' && child.value != null && !['link', 'image'].includes(parent.type)) {
-        const match = /^<\/\/([^>\s]+)>$/.exec(child.value);
-        const link = match == null ? undefined : makePageLink(`/${match[1]}`);
-        if (link != null) {
-          children.push(link);
-          index++;
-          continue;
-        }
-      }
-      if (child.type === 'text' && child.value != null && !['link', 'image'].includes(parent.type)) {
-        const replacements = replaceLegacyLinks(child as Text);
-        if (replacements != null) {
-          children.push(...replacements);
-          index++;
-          continue;
-        }
-      }
       transform(child, source, config);
       children.push(child);
       index++;
@@ -213,7 +163,7 @@ const transform = (node: Node, source: string, config: TraqStampConfig): void =>
   parent.children = children;
 };
 
-export const legacyMarkdownRemarkPlugin = (config: TraqStampConfig) => {
+export const traqStampRemarkPlugin = (config: TraqStampConfig) => {
   return (tree: Node, file: { toString: () => string }): void => {
     transform(tree, file.toString(), config);
   };
