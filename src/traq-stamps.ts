@@ -31,7 +31,7 @@ const createStamp = (raw: string, name: string, origin: string): Stamp => ({
     hProperties: {
       className: [
         'emoji',
-        raw.endsWith(';') ? 's24' : 's32',
+        raw.endsWith(';') ? 'traq-stamp-size-24' : 'traq-stamp-size-em',
         ...(name.startsWith('@')
           ? []
           : [`e_${name.replaceAll('+', '_-plus-_')}`]),
